@@ -14,6 +14,10 @@
 # ACTORS_INCLUDES =
 # ACTORS_LIBRARIES =
 
+# DIR_SUNDAILS =
+# INC_SUNDAILS =
+# LIB_SUNDAILS =
+
 # gfortran compiler flags
 ifeq "$(FC)" "gfortran"
 # Production runs
