@@ -45,7 +45,7 @@ end subroutine ffile_info_C
 
 subroutine mDecisions_C(num_steps,err) bind(C, name='mDecisions_C')
   USE mDecisions_module,only:mDecisions ! module to read model decisions
-  USE allocspace4chm_module,only:allocLocal
+  USE allocspaceActors_module,only:allocLocal
   USE globalData,only:startTime,finshTime,refTime,oldTime
   USE globalData,only:time_meta
 

@@ -28,6 +28,7 @@ USE data_types,only:&
                     var_d,               & ! x%var(:)            (dp)
                     var_ilength,         & ! x%var(:)%dat        (i4b)
                     var_dlength,         & ! x%var(:)%dat        (dp)
+                    zLookup,             & ! x%z(:)%var(:)%lookup(:) (dp)
                     var_dlength_array      ! x%struc(:)%dat       (dp)
 ! access missing values
 USE globalData,only:integerMissing         ! missing integer
@@ -81,6 +82,7 @@ contains
  subroutine SummaActors_runPhysics(&
                 indxHRU,            &
                 modelTimeStep,      &
+                lookupStruct,       &
                 ! primary data structures (scalars)
                 timeStruct,         & ! x%var(:)     -- model time data
                 forcStruct,         & ! x%var(:)     -- model forcing data
@@ -127,6 +129,7 @@ contains
  ! dummy variables
  integer(i4b),intent(in)                  :: indxHRU                ! id of HRU                   
  integer(i4b),intent(in)                  :: modelTimeStep          ! time step index
+ type(zLookup),intent(inout)              :: lookupStruct
  ! primary data structures (scalars)
  type(var_i),intent(inout)                :: timeStruct             ! model time data
  type(var_d),intent(inout)                :: forcStruct             ! model forcing data
@@ -306,6 +309,7 @@ contains
                  forcStruct,         & ! intent(in):    model forcing data
                  mparStruct,         & ! intent(in):    model parameters
                  bvarStruct,         & ! intent(in):    basin-average model variables
+                 lookupStruct,       & ! intent(in):    lookup tables
                  ! data structures (input-output)
                  indxStruct,         & ! intent(inout): model indices
                  progStruct,         & ! intent(inout): model prognostic variables for a local HRU

@@ -151,10 +151,7 @@ SUMMA_SOLVER= \
 		computResidDAE.f90 \
 		eval8DAE.f90 \
 		evalDAE4IDA.f90 \
-		computJacDAE.f90 \
-		eval8JacDAE.f90 \
-		evalJac4IDA.f90 \
-		computSnowDepth.f90 \
+		computeSnowDepth.f90 \
 		solveByIDA.f90 \
       	systemSolvSundials.f90 \
 		varSubstep.f90 \

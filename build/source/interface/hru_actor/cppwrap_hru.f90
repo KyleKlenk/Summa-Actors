@@ -21,7 +21,9 @@ contains
 subroutine Initialize(&
   indxGRU,            &
   num_steps,          &
-  ! statistics structures
+  ! lookup Structure
+  handle_lookupStruct, & !  
+  ! statistics structures 
   handle_forcStat,    & !  model forcing data
   handle_progStat,    & !  model prognostic (state) variables
   handle_diagStat,    & !  model diagnostic variables
@@ -53,12 +55,14 @@ subroutine Initialize(&
   ! miscellaneous variables
   err) bind(C,name='Initialize')
 
-  use summa4chm_init,only:summa4chm_initialize          
+  use summaActors_init,only:summaActors_initialize          
 
   implicit none
   ! calling variables
   integer(c_int),intent(in)             :: indxGRU
   integer(c_int),intent(out)            :: num_steps
+  ! lookup structure
+  type(c_ptr), intent(in), value        :: handle_lookupStruct
   ! statistics structures
   type(c_ptr), intent(in), value        :: handle_forcStat !  model forcing data
   type(c_ptr), intent(in), value        :: handle_progStat !  model prognostic (state) variables
@@ -92,6 +96,7 @@ subroutine Initialize(&
   !---------------------------------------------------------------------------------------------------  
   ! local variables
 
+  type(zLookup),pointer                  :: lookupStruct
   ! statistics structures
   type(var_dlength),pointer              :: forcStat                   !  model forcing data
   type(var_dlength),pointer              :: progStat                   !  model prognostic (state) variables
@@ -125,6 +130,7 @@ subroutine Initialize(&
 
 
   ! getting data
+  call c_f_pointer(handle_lookupStruct, lookupStruct)
   call c_f_pointer(handle_forcStat, forcStat)
   call c_f_pointer(handle_progStat, progStat)
   call c_f_pointer(handle_diagStat, diagStat)
@@ -150,9 +156,11 @@ subroutine Initialize(&
   call c_f_pointer(handle_oldTime, oldTime)
 
 
-  call summa4chm_initialize(&
+  call summaActors_initialize(&
     indxGRU,      & ! index of the parent GRU
     num_steps,    &
+    ! lookup Struct
+    lookupStruct, &
     ! statistics structures
     forcStat,     & ! model forcing data
     progStat,     & ! model prognostic (state) variables
@@ -425,6 +433,7 @@ end subroutine Forcing
 subroutine RunPhysics(&
   indxHRU,                &
   step_index,             &
+  handle_lookupStruct,    &
   ! primary data structures (scalars)
   handle_timeStruct,      & ! x%var(:)     -- model time data
   handle_forcStruct,      & ! x%var(:)     -- model forcing data
@@ -452,30 +461,32 @@ subroutine RunPhysics(&
   !======= Declarations =========
   implicit none
   ! calling variables  
-  integer(c_int), intent(in)        :: indxHRU
-  integer(c_int), intent(in)        :: step_index
+  integer(c_int), intent(in)         :: indxHRU
+  integer(c_int), intent(in)         :: step_index
+  type(c_ptr), intent(in), value     :: handle_lookupStruct
   ! primary data structures (scalars)
-  type(c_ptr), intent(in), value    :: handle_timeStruct ! model time data
-  type(c_ptr), intent(in), value    :: handle_forcStruct ! model forcing data
-  type(c_ptr), intent(in), value    :: handle_attrStruct ! local attributes for each HRU
-  type(c_ptr), intent(in), value    :: handle_typeStruct ! local classification of soil veg etc. for each HRU
+  type(c_ptr), intent(in), value     :: handle_timeStruct ! model time data
+  type(c_ptr), intent(in), value     :: handle_forcStruct ! model forcing data
+  type(c_ptr), intent(in), value     :: handle_attrStruct ! local attributes for each HRU
+  type(c_ptr), intent(in), value     :: handle_typeStruct ! local classification of soil veg etc. for each HRU
   ! primary data structures (variable length vectors)
-  type(c_ptr), intent(in), value    :: handle_indxStruct ! model indices
-  type(c_ptr), intent(in), value    :: handle_mparStruct ! model parameters
-  type(c_ptr), intent(in), value    :: handle_progStruct ! model prognostic (state) variables
-  type(c_ptr), intent(in), value    :: handle_diagStruct ! model diagnostic variables
-  type(c_ptr), intent(in), value    :: handle_fluxStruct ! model fluxes
+  type(c_ptr), intent(in), value     :: handle_indxStruct ! model indices
+  type(c_ptr), intent(in), value     :: handle_mparStruct ! model parameters
+  type(c_ptr), intent(in), value     :: handle_progStruct ! model prognostic (state) variables
+  type(c_ptr), intent(in), value     :: handle_diagStruct ! model diagnostic variables
+  type(c_ptr), intent(in), value     :: handle_fluxStruct ! model fluxes
   ! basin-average structures
-  type(c_ptr), intent(in), value    :: handle_bvarStruct ! basin-average variables
-  real(c_double),intent(inout)      :: fracJulDay
-  real(c_double),intent(inout)      :: tmZoneOffsetFracDay 
-  integer(c_int),intent(inout)      :: yearLength
-  integer(c_int),intent(inout)      :: computeVegFlux    ! flag to indicate if we are computing fluxes over vegetation
-  real(c_double),intent(inout)      :: dt_init
-  integer(c_int),intent(in)         :: dt_init_factor    ! Used to adjust the length of the timestep in the event of a failure
-  integer(c_int), intent(out)       :: err
+  type(c_ptr), intent(in), value     :: handle_bvarStruct ! basin-average variables
+  real(c_double),intent(inout)       :: fracJulDay
+  real(c_double),intent(inout)       :: tmZoneOffsetFracDay 
+  integer(c_int),intent(inout)       :: yearLength
+  integer(c_int),intent(inout)       :: computeVegFlux    ! flag to indicate if we are computing fluxes over vegetation
+  real(c_double),intent(inout)       :: dt_init
+  integer(c_int),intent(in)          :: dt_init_factor    ! Used to adjust the length of the timestep in the event of a failure
+  integer(c_int), intent(out)        :: err
 
   ! local variables
+  type(zLookup),pointer              :: lookupStruct
   ! primary data structures (scalars)
   type(var_i),pointer                :: timeStruct                 !  model time data
   type(var_d),pointer                :: forcStruct                 !  model forcing data
@@ -490,7 +501,7 @@ subroutine RunPhysics(&
   ! basin-average structures
   type(var_dlength),pointer          :: bvarStruct                 !  basin-average variables 
   character(len=256)                 :: message
-
+  call c_f_pointer(handle_lookupStruct, lookupStruct)
   call c_f_pointer(handle_timeStruct, timeStruct)
   call c_f_pointer(handle_forcStruct, forcStruct)
   call c_f_pointer(handle_attrStruct, attrStruct)
@@ -506,6 +517,7 @@ subroutine RunPhysics(&
   call SummaActors_runPhysics(&
     indxHRU,                & 
     step_index,             &
+    lookupStruct,           &
     ! primary data structures (scalars)
     timeStruct,             & ! x%var(:)     -- model time data
     forcStruct,             & ! x%var(:)     -- model forcing data

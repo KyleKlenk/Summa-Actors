@@ -149,6 +149,13 @@ integer(i4b),parameter,public :: pahaut_76            = 314    ! Pahaut 1976, wi
 integer(i4b),parameter,public :: meltDripUnload       = 321    ! Hedstrom and Pomeroy (1998), Storck et al 2002 (snowUnloadingCoeff & ratioDrip2Unloading)
 integer(i4b),parameter,public :: windUnload           = 322    ! Roesch et al 2001, formulate unloading based on wind and temperature
 ! -----------------------------------------------------------------------------------------------------------
+! look-up values for the choice of energy equation
+integer(i4b),parameter,public :: enthalpyFD           =  323    ! enthalpyFD
+integer(i4b),parameter,public :: closedForm           =  324    ! closedForm
+! look-up values for the choice of DAE solver
+integer(i4b),parameter,public :: sundialIDA           =  325    ! IDA solver form Sundials package
+integer(i4b),parameter,public :: backwEuler           =  326    ! backward Euler method implemented by Martyn
+! -----------------------------------------------------------------------------------------------------------
 
 contains
 
@@ -407,6 +414,25 @@ subroutine mDecisions(numSteps,err,message)
     case('itersurf'); model_decisions(iLookDECISIONS%num_method)%iDecision = iterSurfEnergyBal   ! iterate only on the surface energy balance
     case default
     err=10; message=trim(message)//"unknown numerical method [option="//trim(model_decisions(iLookDECISIONS%num_method)%cDecision)//"]"; return
+  end select
+
+    ! how to compute heat capacity in energy equation
+  select case(trim(model_decisions(iLookDECISIONS%howHeatCap)%cDecision))
+    case('enthalpyFD'); model_decisions(iLookDECISIONS%howHeatCap)%iDecision = enthalpyFD        ! enthalpyFD
+    case('closedForm'); model_decisions(iLookDECISIONS%howHeatCap)%iDecision = closedForm        ! closedForm
+    case default
+    ! TODO: after adding howHeatCap decision in corresponding file we should delete the next line
+    model_decisions(iLookDECISIONS%howHeatCap)%iDecision = closedForm
+    ! err=10; message=trim(message)//"unknown Cp computation [option="//trim(model_decisions(iLookDECISIONS%howHeatCap)%cDecision)//"]"; return
+  end select
+
+  select case(trim(model_decisions(iLookDECISIONS%diffEqSolv)%cDecision))
+    case('sundialIDA'); model_decisions(iLookDECISIONS%diffEqSolv)%iDecision = sundialIDA        ! enthalpyFD
+    case('backwEuler'); model_decisions(iLookDECISIONS%diffEqSolv)%iDecision = backwEuler        ! closedForm
+    case default
+    ! TODO: after adding diffEqSolv decision in corresponding file we should delete the next line
+     model_decisions(iLookDECISIONS%diffEqSolv)%iDecision = sundialIDA
+    ! err=10; message=trim(message)//"unknown DAE solver [option="//trim(model_decisions(iLookDECISIONS%diffEqSolv)%cDecision)//"]"; return
   end select
 
   ! identify the method used to calculate flux derivatives

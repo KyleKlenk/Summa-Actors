@@ -201,6 +201,7 @@ void Initialize_HRU(stateful_actor<hru_state>* self) {
     // aout(self) << "Entering Initalize \n"; 
     Initialize(&self->state.indxGRU,
             &self->state.num_steps, 
+            self->state.handle_lookupStruct,
             self->state.handle_forcStat, 
             self->state.handle_progStat, 
             self->state.handle_diagStat, 
@@ -314,6 +315,7 @@ int Run_HRU(stateful_actor<hru_state>* self) {
     self->state.err = 0;
     RunPhysics(&self->state.indxHRU,
         &self->state.timestep,
+        self->state.handle_lookupStruct,
         self->state.handle_timeStruct, 
         self->state.handle_forcStruct,
         self->state.handle_attrStruct,

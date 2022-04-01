@@ -6,6 +6,8 @@ extern "C" {
   // Initialize HRU data_structures
 	void Initialize(
         int* indxGRU, int* num_steps,
+        // lookup structure
+        void* lookupStruct,
         // Statistics Structures
         void* forcStat, void* progStat, void* diagStat, void* fluxStat, void* indxStat, void* bvarStat,
         // Primary Data Structures (scalars) 
@@ -53,6 +55,7 @@ extern "C" {
   // Run the model for one timestep
   void  RunPhysics(
       int* id, int* stepIndex,
+      void* lookupStruct,
       // primary data structures (scalars)
       void* timeStruct, void* forcStruct, void* attrStruct, void* typeStruct,
       // primary data structures (variable length vectors) 

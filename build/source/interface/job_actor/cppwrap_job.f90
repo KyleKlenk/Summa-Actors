@@ -27,7 +27,7 @@ subroutine initGlobals(file_manager, totalGRUs, totalHRUs, numGRUs, numHRUs, sta
   ! set up forcing data, needed here to avoid concurrent access
   USE ffile_info_module,only:ffile_info                       ! module to read information on forcing datafile
   USE mDecisions_module,only:mDecisions                       ! module to read model decisions
-  USE allocspace4chm_module,only:allocLocal
+  USE allocspaceActors_module,only:allocLocal
 
   USE cppwrap_auxiliary,only:c_f_string
 

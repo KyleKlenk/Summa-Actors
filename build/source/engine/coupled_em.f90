@@ -36,6 +36,7 @@ USE data_types,only:&
                     var_i,               & ! x%var(:)            (i4b)
                     var_d,               & ! x%var(:)            (dp)
                     var_ilength,         & ! x%var(:)%dat        (i4b)
+                    zLookup,             & ! x%z(:)%var(:)%lookup(:) (dp)
                     var_dlength            ! x%var(:)%dat        (dp)
 
 ! named variables for parent structures
@@ -111,6 +112,7 @@ contains
                        forc_data,         & ! intent(in):    model forcing data
                        mpar_data,         & ! intent(in):    model parameters
                        bvar_data,         & ! intent(in):    basin-average variables
+                       lookup_data,       & ! intent(in):    lookup tables
                        ! data structures (input-output)
                        indx_data,         & ! intent(inout): model indices
                        prog_data,         & ! intent(inout): prognostic variables for a local HRU
@@ -121,8 +123,8 @@ contains
                        ! error control
                        err,message)         ! intent(out):   error control
  ! structure allocations
- USE allocspace4chm_module,only:allocLocal      ! allocate local data structures
- USE allocspace4chm_module,only:resizeData      ! clone a data structure
+ USE allocspaceActors_module,only:allocLocal      ! allocate local data structures
+ USE allocspaceActors_module,only:resizeData      ! clone a data structure
  ! preliminary subroutines
  USE vegPhenlgy_module,only:vegPhenlgy      ! compute vegetation phenology
  USE vegNrgFlux_module,only:wettedFrac      ! compute wetted fraction of the canopy (used in sw radiation fluxes)
@@ -160,6 +162,7 @@ contains
  type(var_d),intent(in)               :: forc_data              ! model forcing data
  type(var_dlength),intent(in)         :: mpar_data              ! model parameters
  type(var_dlength),intent(in)         :: bvar_data              ! basin-average model variables
+ type(zLookup),intent(in)             :: lookup_data            ! lookup tables
  ! data structures (input-output)
  type(var_ilength),intent(inout)      :: indx_data              ! state vector geometry
  type(var_dlength),intent(inout)      :: prog_data              ! prognostic variables for a local HRU
@@ -753,6 +756,7 @@ contains
                   diag_data,                              & ! intent(inout): model diagnostic variables for a local HRU
                   flux_data,                              & ! intent(inout): model fluxes for a local HRU
                   bvar_data,                              & ! intent(in):    model variables for the local basin
+                  lookup_data,                            & ! intent(in):    lookup tables
                   model_decisions,                        & ! intent(in):    model decisions
                   ! output: model control
                   dtMultiplier,                           & ! intent(out):   substep multiplier (-)

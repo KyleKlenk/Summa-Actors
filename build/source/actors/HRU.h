@@ -35,7 +35,8 @@ struct hru_state {
 	int forcingFileStep;
 	int currentForcingFile = 1;
 
-
+    // lookupTable structure (Sundials)
+    void *handle_lookupStruct = new_handle_zlookup();
     // statistics structures
     void *handle_forcStat = new_handle_var_dlength();	// model forcing data	
     void *handle_progStat = new_handle_var_dlength();	// model prognostic (state) variables                   
